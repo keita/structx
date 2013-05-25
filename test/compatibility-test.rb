@@ -17,11 +17,16 @@ def load_test(target)
   eval patch(File.read(path))
 end
 
-if Ruby::Version >= "1.9" and Ruby::Version < "2.0"
-  load_test("1.9")
-end
+if Ruby::Engine::NAME == "ruby"
+  if Ruby::Version >= "1.9" and Ruby::Version < "2.0"
+    load_test("1.9")
+  end
 
-if Ruby::Version >= "2.0"
-  load_test("2.0")
+  if Ruby::Version >= "2.0"
+    load_test("2.0")
+  end
+else
+  puts "We cannot run compatibility test with jruby and rbx."
+  puts "Related to Struct, these VMs are not compatible with MRI."
 end
 
