@@ -2,6 +2,8 @@
 
 StructX is an extension of Ruby standard Struct. The diffences are that 1) the constructor handles hash table as key-value pairs, 2) you can specify members as statements, and 3) you can set default values of member. StructX's API is compatible with Struct.
 
+[![Gem Version](https://badge.fury.io/rb/structx.png)](http://badge.fury.io/rb/structx) [![Build Status](https://travis-ci.org/keita/structx.png?branch=master)](https://travis-ci.org/keita/structx) [![Coverage Status](https://coveralls.io/repos/keita/structx/badge.png?branch=master)](https://coveralls.io/r/keita/structx) [![Code Climate](https://codeclimate.com/github/keita/structx.png)](https://codeclimate.com/github/keita/structx)
+
 ## Installation
 
     $ gem install structx
