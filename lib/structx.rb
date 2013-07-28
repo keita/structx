@@ -201,6 +201,23 @@ class StructX
 
   def __build__(data)
     tbl = data.inject({}) {|tbl, (m, val)| tbl.tap {|x| x[m] = val if val}}
-    self.class.default_values.merge(tbl)
+    default_values = self.class.default_values.inject({}) do |_tbl, (key, val)|
+      _tbl.tap {|x| x[key] = __build_default_value__(val, data)}
+    end
+    default_values.merge(tbl)
+  end
+
+  def __build_default_value__(val, data)
+    return val unless val.kind_of?(Proc)
+
+    if val.arity == 1
+      val.call(self)
+    elsif val.arity > 1
+      val.call(self, data)
+    elsif val.arity < 0
+      val.call(self, data)
+    else
+      val.call
+    end
   end
 end

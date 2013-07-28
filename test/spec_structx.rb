@@ -6,6 +6,12 @@ class A < StructX
   member :z, type: Integer, default: 100
 end
 
+class B < StructX
+  member :p0, default: lambda { $N }
+  member :p1, default: lambda {|obj| $N + 1}
+  member :p2, default: lambda {|obj, data| $N +2}
+end
+
 describe "StructX" do
   describe "StructX.new(:x, :y, :z)" do
     before do
@@ -198,6 +204,17 @@ describe "StructX" do
         obj.y.should == 10
         obj.z.should == 100
       end
+    end
+  end
+
+  describe "B < StructX" do
+    it "should get default value" do
+      $N = 1
+      obj1 = B.new
+      $N = 10
+      obj2 = B.new
+      obj1.values.should == [1, 2, 3]
+      obj2.values.should == [10, 11, 12]
     end
   end
 end
