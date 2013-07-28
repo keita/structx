@@ -10,6 +10,7 @@ describe "StructX" do
   describe "StructX.new(:x, :y, :z)" do
     before do
       @class = StructX.new(:x, :y, :z)
+      @immutable = Class.new(@class).tap {|subclass| subclass.immutable}
     end
 
     it "should have 3 members" do
@@ -90,6 +91,10 @@ describe "StructX" do
         x[:y].should == 2
         x[:z].should == 3
         should.raise(NameError) { x[:a] }
+        # by #get
+        x.get(:x).should == 1
+        x.get(:y).should == 2
+        x.get(:z).should == 3
       end
     end
 
@@ -111,6 +116,12 @@ describe "StructX" do
         x[:z].should == 5
         should.raise(NameError) { x[:a] = 1}
       end
+      # immutable tests
+      orig = @immutable.new(1, 2, 3)
+      orig.values.should == [1, 2, 3]
+      updated = orig.set(x: 4, y: 5, z: 6)
+      updated.values.should == [4, 5, 6]
+      orig.values.should == [1, 2, 3]
     end
 
     it "should iterate values" do

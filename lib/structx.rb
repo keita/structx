@@ -93,15 +93,24 @@ class StructX
       end
     end
 
+    def immutable(b=true)
+      @immutable = b
+    end
+
+    def immutable?
+      @immutable
+    end
+
     private
 
     def inherited(subclass)
       @member.each {|key, data| subclass.member(key, data)} if @member
+      subclass.instance_variable_set(:@immutable, true) if @immutable
     end
   end
 
   # almost methods are forwarded to value table
-  forward :class, :members
+  forward! :class, :members, :immutable?
   forward :@value, :each, :each_pair
   forward! :@value, :values, :length, :size, :hash
   forward! lambda{|x| @value.values}, :each, :values_at
@@ -128,13 +137,41 @@ class StructX
     end
   end
 
+  # Same as Struct#[].
+  alias :get :"[]"
+
   # Same as Struct#[]=.
   def []=(idx, val)
     case idx
     when Integer
-      size > idx && -size <= idx ? @value[members[idx]] = val : (raise IndexError.new(idx))
+      if size > idx && -size <= idx
+        if not(immutable?)
+          @value[members[idx]] = val
+        else
+          self.class.new(@value.merge(members[idx] => val))
+        end
+      else
+        raise IndexError.new(idx)
+      end
     when Symbol, String
-      members.include?(idx.to_sym) ? @value[idx.to_sym] = val : (raise NameError.new(idx.to_s))
+      if members.include?(idx.to_sym)
+        if not(immutable?)
+          @value[idx.to_sym] = val
+        else
+          self.class.new(@value.merge(idx.to_sym => val))
+        end
+      else
+        raise NameError.new(idx.to_s)
+      end
+    end
+  end
+
+  # Same as #[]=, but you can set values by hash.
+  def set(pairs={})
+    if not(immutable?)
+      pairs.each {|idx, val| obj[idx] = val}
+    else
+      pairs.inject(self) {|obj, (idx, val)| obj.send("[]=", idx, val)}
     end
   end
 
