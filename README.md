@@ -38,6 +38,20 @@ end
 B.new(1) # => #<struct B x=1, y=10, z=100>
 ```
 
+You can set dynamic default values with proc object.
+
+```ruby
+class B < StructX
+  member :x, default: lambda {$N}
+  member :y, default: lambda {|obj| $N+1}
+  member :z, default: lambda {|obj, data| $N+2}
+end
+$N = 1
+B.new # => #<struct B x=1, y=2, z=3>
+$N = 10
+B.new # => #<struct B x=10, y=11, z=12>
+```
+
 ### Immutable mode
 
 ```ruby
