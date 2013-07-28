@@ -16,7 +16,7 @@ StructX is an extension of Ruby standard Struct. The diffences are that 1) the c
 StructX.new(:x, :y, :z).new(x: 1, y: 2, z: 3) #=> #<struct x=1, y=10, z=100>
 ```
 
-### Member sentences
+### Member declarations
 
 ```ruby
 class A < StructX
@@ -36,6 +36,21 @@ class B < StructX
   member :z, default: 100
 end
 B.new(1) # => #<struct B x=1, y=10, z=100>
+```
+
+### Immutable mode
+
+```ruby
+class C < StructX
+  immutable true
+  member :x
+  member :y
+  member :z
+end
+orig = C.new(1, 2, 3) #=> #<struct C x=1, y=2, z=3>
+updated = orig.set(x: 4, y: 5, z: 6) #=> #<struct C x=4, y=5, z=6>
+orig.values    #=> [1, 2, 3]
+updated.values #=> [4, 5, 6]
 ```
 
 ## Documentation
