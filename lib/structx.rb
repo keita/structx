@@ -169,7 +169,7 @@ class StructX
   # Same as #[]=, but you can set values by hash.
   def set(pairs={})
     if not(immutable?)
-      pairs.each {|idx, val| obj[idx] = val}
+      pairs.each {|idx, val| self[idx] = val}
     else
       pairs.inject(self) {|obj, (idx, val)| obj.send("[]=", idx, val)}
     end

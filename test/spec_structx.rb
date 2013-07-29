@@ -122,6 +122,12 @@ describe "StructX" do
         x[:z].should == 5
         should.raise(NameError) { x[:a] = 1}
       end
+      # test for #set
+      @class.new(1, 2, 3).tap do |x|
+        x.set(x: 4, y: 5, z: 6)
+        x.values.should == [4, 5, 6]
+      end
+
       # immutable tests
       orig = @immutable.new(1, 2, 3)
       orig.values.should == [1, 2, 3]
