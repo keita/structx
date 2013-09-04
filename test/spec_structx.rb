@@ -39,6 +39,9 @@ describe "StructX" do
         obj.y.should == 2
         obj.z.should == 3
       end
+      @class.new(true, false, nil).tap do |obj|
+        obj.values.should == [true, false]
+      end
     end
 
     it "should create an instance with key" do
@@ -130,8 +133,10 @@ describe "StructX" do
 
       # immutable tests
       orig = @immutable.new(1, 2, 3)
+      orig.should.kind_of StructX
       orig.values.should == [1, 2, 3]
       updated = orig.set(x: 4, y: 5, z: 6)
+      updated.should.kind_of StructX
       updated.values.should == [4, 5, 6]
       orig.values.should == [1, 2, 3]
     end

@@ -40,7 +40,7 @@ class StructX
     #   Same as Struct if args is Array. Consider args as key-value pairs if it is Hash.
     def new(*args)
       # create an instance
-      return orig_new(*args) if @member
+      return orig_new(*args) if @__member__ and @__member__.keys.size > 0
 
       # create subclass
       Class.new(StructX).tap do |subclass|
@@ -60,7 +60,7 @@ class StructX
 
     # Same as Struct#members.
     def members
-      (@member ||= {}).keys
+      (@__member__ ||= {}).keys
     end
 
     # Add member into structure.
@@ -70,7 +70,7 @@ class StructX
     # @param data [Hash]
     #   member options
     def member(name, data={})
-      (@member ||= {})[name] = Hash.new.merge(data)
+      (@__member__ ||= {})[name] = Hash.new.merge(data) # clone the data
 
       # define member's value reader
       define_method(name) do
@@ -88,7 +88,7 @@ class StructX
     # @return [Hash{Symbol=>Object}]
     #   default values
     def default_values
-      @member.inject({}) do |tbl, (key, val)|
+      @__member__.inject({}) do |tbl, (key, val)|
         tbl.tap {|x| x[key] = val[:default] if val.has_key?(:default)}
       end
     end
@@ -104,7 +104,7 @@ class StructX
     private
 
     def inherited(subclass)
-      @member.each {|key, data| subclass.member(key, data)} if @member
+      @__member__.each {|key, data| subclass.member(key, data)} if @__member__
       subclass.instance_variable_set(:@immutable, true) if @immutable
     end
   end
@@ -170,6 +170,7 @@ class StructX
   def set(pairs={})
     if not(immutable?)
       pairs.each {|idx, val| self[idx] = val}
+      return self
     else
       pairs.inject(self) {|obj, (idx, val)| obj.send("[]=", idx, val)}
     end
@@ -178,9 +179,9 @@ class StructX
   # Same as Struct#inspect.
   def inspect
     name = self.class.inspect[0] == "#" ? "" : " " + self.class.inspect
-    values = @value.map do |key, val|
+    values = (@value || []).map do |key, val|
       k = (key.to_s[0] == "@" ? ":" : "") + key.to_s
-      v = self == val ? "#<struct %s:...>" % val : val.inspect
+      v = (self == val ? "#<struct %s:...>" % val : val.inspect)
       "%s=%s" % [k, v]
     end
     "#<struct%s %s>" % [name, values.join(", ")]
@@ -200,7 +201,7 @@ class StructX
   private
 
   def __build__(data)
-    tbl = data.inject({}) {|tbl, (m, val)| tbl.tap {|x| x[m] = val if val}}
+    tbl = data.inject({}) {|tbl, (m, val)| tbl.tap {|x| x[m] = val unless val.nil?}}
     default_values = self.class.default_values.inject({}) do |_tbl, (key, val)|
       _tbl.tap {|x| x[key] = __build_default_value__(val, data)}
     end
